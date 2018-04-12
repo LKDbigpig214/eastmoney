@@ -1,4 +1,3 @@
-
 import requests
 import re
 import json
@@ -6,14 +5,10 @@ import numpy as np
 import pandas as pd
 import time
 import sys
-import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus']=False
 
-with open('cookie.txt','rt') as f:
+with open('cookie.txt','rb') as f:
     cookie = str(f.readline())
-    #print cookie
+    
 
 def getHTMLText(url,headers):
     try:
@@ -36,8 +31,8 @@ def getJSList(content):
 def getPageInfo():
     url = 'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?\
 type=ct&st=(BalFlowMain)&sr=-1&p=1&ps=100&js=var%20CyvdbAfK={pages:(pc),\
-date:%222014-10-22%22,data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&cmd=C._AB\
-&sty=DCFFITA&rt=50752228'
+date:%222014-10-22%22,data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&\
+cmd=C._AB&sty=DCFFITA&rt=50752228'
     
     headers = {'Accept' : '*/*', 'Accpet-Encoding': 'zh-CN,zh;q=0.8',
                'Host': 'nufm.dfcfw.com',
@@ -46,7 +41,6 @@ date:%222014-10-22%22,data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&cmd=C._
 537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
     
     r = getHTMLText(url,headers=headers)
-    #print r
     l = getJSList(r)
     df = list2Frame(l)
     return df
@@ -64,7 +58,7 @@ def getMyStock():
                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/\
 537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
     stock_list_url = 'https://myfavor1.eastmoney.com/mystock?f=gs&\
-cb=getStockInfo&g=169597668&0.01951945448582526'
+cb=getStockInfo&g=1693130&0.8179450208622452'
     html = getHTMLText(stock_list_url,headers)
     d = eval(html.split(b'"data":')[1][:-3])
     l = d['order'].split(',')
@@ -91,7 +85,6 @@ def add2MyStock(code):
     url = 'http://mystock.eastmoney.com/mystock.aspx?f=asz&sc=%s&\
 var=opfavres&rt=1207' % code
     html = getHTMLText(url, headers)
-    #print html
 
 
 def getProfit(code):
@@ -132,18 +125,11 @@ xml;q=0.9,image/webp,*/*;q=0.8',
     l = eval(html)
     if l == []:
         return isHighThanPre0(code, flag)
-    #print html
-    #time = l[0]['ReportDate']
     price0 = l[0]['BasicEPS']
-    #print code,time,price0
-    #time = l[-1]['ReportDate']
     price1 = l[-1]['BasicEPS']
+    if price0 == '' or price1 == '':
+        return True
     return float(price0) > float(price1)
-    #print code,time,price0
-    #print html
-    #dict_json = json.loads(html)
-    #str_json = json.dumps(dict_json)
-    #print str_json[0]
     
 
 def isHighThanPre0(code, flag):
@@ -170,11 +156,8 @@ xml;q=0.9,image/webp,*/*;q=0.8',
         if v['date'] == '2016-12-31':
             price0 = v['jbmgsy']
             break
-    #print code,'2016-12-31',price0
-    #time = l[0]['date']
     price1 = l[0]['jbmgsy']
     return price0 < price1
-    #print code,time,price0
     
     
 def list2Frame(l):
@@ -249,7 +232,6 @@ cmd=%s&sty=CTBF&cb=getStockFullInfo&js=([(x)])&0.6878471248727867'%code
     result = np.array(result)
     df = pd.DataFrame(data = result, columns=columns)
     df[num_columns] = df[num_columns].apply(pd.to_numeric, errors='ingnore')
-    #print df
     return df
     
 
@@ -293,7 +275,6 @@ cmd=%s&sty=CTALL&cb=getStockFullInfo&js=([(x)])&0.5702436672405287'%code
     result = np.array(result)
     df = pd.DataFrame(data = result, columns=columns)
     df[num_columns] = df[num_columns].apply(pd.to_numeric, errors='ingnore')
-    #print df
     return df
 
 
@@ -328,8 +309,6 @@ cmd=%s&sty=CTDDE&cb=getStockFullInfo&js=([(x)])&0.481399740449725'%code
        
     result = np.array(result)
     df = pd.DataFrame(data = result, columns=columns)
-    #df[num_columns] = df[num_columns].apply(pd.to_numeric, errors='ingnore')
-    #print df
     return df
 
 
@@ -374,27 +353,13 @@ if __name__ == '__main__':
         df1.to_excel(writer, 'MO2')
         df2.to_excel(writer, 'DDE2')
         writer.save()
-        df3 = df[['最新价','最高','最低']]
-        print(df3)
-        '''x = []
-        for i in df['名称']:
-            x.append(i.decode('utf-8'))'''
-        plt.ion()
-        df3.plot()
-        font = FontProperties(fname=r"c:/windows/fonts/simsun.ttc")
-        ax = plt.gca()
-        ax.set_xticklabels(df['名称'],fontproperties=font)
-        cnt = 0
-        #plt.close()
     
         while True:
             try:
-                for i in range(30,0,-1):
-                    #print(i,flush=True)
+                for i in range(300,0,-1):
                     sys.stdout.write('{:0>2}'.format(str(i)) + ' s\r')
                     sys.stdout.flush()
-                    #time.sleep(1)
-                    plt.pause(1)
+                    time.sleep(1)
                 info = getPageInfo()
                 df60 = info[info['市盈'] < 60]
                 print('*'*20)
@@ -423,23 +388,9 @@ if __name__ == '__main__':
                 df1.to_excel(writer, 'MO2')
                 df2.to_excel(writer, 'DDE2')
                 writer.save()
-                df3 = df[['最新价','最高','最低']]
-                #print df3
-                x = []
-                '''for i in df['名称']:
-                    x.append(i.decode('utf-8'))'''
-                ax.cla()
-                df3.plot(ax = ax)
-                font = FontProperties(fname=r"c:/windows/fonts/simsun.ttc")
-                ax = plt.gca()
-                ax.set_xticklabels(df['名称'],fontproperties=font)
-                cnt += 1
-                if cnt == 3:
-                    plt.close()
-                    break
             except Exception as e:
                 print(str(e))
                 pass
     except Exception as e:
-        print(tr(e))
+        print(str(e))
     
