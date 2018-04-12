@@ -357,7 +357,7 @@ if __name__ == '__main__':
         while True:
             try:
                 for i in range(300,0,-1):
-                    sys.stdout.write('{:0>2}'.format(str(i)) + ' s\r')
+                    sys.stdout.write('{:0>3}'.format(str(i)) + ' s\r')
                     sys.stdout.flush()
                     time.sleep(1)
                 info = getPageInfo()
