@@ -1,1 +1,1 @@
-This is only a demo!
+运行eastmoney_windows.py
