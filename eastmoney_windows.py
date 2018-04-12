@@ -28,11 +28,29 @@ def getJSList(content):
     return l
 
 
-def getPageInfo():
+def getBalFlowMain():
     url = 'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?\
 type=ct&st=(BalFlowMain)&sr=-1&p=1&ps=100&js=var%20CyvdbAfK={pages:(pc),\
 date:%222014-10-22%22,data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&\
 cmd=C._AB&sty=DCFFITA&rt=50752228'
+    
+    headers = {'Accept' : '*/*', 'Accpet-Encoding': 'zh-CN,zh;q=0.8',
+               'Host': 'nufm.dfcfw.com',
+               'Referer': 'http://data.eastmoney.com/zjlx/detail.html',
+               'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/\
+537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+    
+    r = getHTMLText(url,headers=headers)
+    l = getJSList(r)
+    df = list2Frame(l)
+    return df
+
+
+def getBalFlowNetRate():
+    url = 'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?\
+type=ct&st=(BalFlowNetRate)&sr=-1&p=1&ps=50&js=var tcRNQXTW={pages:(pc),\
+date:"2014-10-22",data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&\
+cmd=C._AB&sty=DCFFITA&rt=50784441'    
     
     headers = {'Accept' : '*/*', 'Accpet-Encoding': 'zh-CN,zh;q=0.8',
                'Host': 'nufm.dfcfw.com',
@@ -329,18 +347,34 @@ def getMultiStockInfo(code):
     
 if __name__ == '__main__':
     try:
-        df = getPageInfo()
-        df60 = df[df['市盈'] < 60]
+        dfm = getBalFlowMain()
+        dfr = getBalFlowNetRate()
+        dfm = dfm.head(50)
+        dfr = dfr.head(50)
+        dfr50 = dfr[dfr['市盈'] < 50]
         print('*'*20)
-        print('市盈小于60的股票：')
-        print(df60)
+        print('净占比前50市盈小于60的股票：')
+        print(dfr50)
         myStock = getMyStock()
-        for i in df60.head(50).index:
-            code = df60.head(50)['代码'][i]
-            flag = df60.head(50)['flag'][i]
-            if (code+flag) not in myStock and isHighThanPre(code, flag):
-                print(df60.head(50)['名称'][i], ' 不在自选中，加入自选')
+        for i in dfr50.index:
+            code = dfr50['代码'][i]
+            flag = dfr50['flag'][i]
+            if (code+flag) not in myStock:
+                print(dfr50['名称'][i], ' 不在自选中，加入自选')
                 add2MyStock(code+'|0'+ flag +'|01')
+                
+        dfm50 = dfm[dfm['市盈'] < 50]
+        print('*'*20)
+        print('净额前50市盈小于60的股票：')
+        print(dfm50)
+        myStock = getMyStock()
+        for i in dfm50.index:
+            code = dfm50['代码'][i]
+            flag = dfm50['flag'][i]
+            if (code+flag) not in myStock:
+                print(dfm50['名称'][i], ' 不在自选中，加入自选')
+                add2MyStock(code+'|0'+ flag +'|01')
+                
         myStock = getMyStock()
         df , df0, df1, df2 = getMultiStockInfo(','.join(myStock))
         print()
