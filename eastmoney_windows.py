@@ -394,18 +394,34 @@ if __name__ == '__main__':
                     sys.stdout.write('{:0>3}'.format(str(i)) + ' s\r')
                     sys.stdout.flush()
                     time.sleep(1)
-                info = getPageInfo()
-                df60 = info[info['市盈'] < 60]
+                dfm = getBalFlowMain()
+                dfr = getBalFlowNetRate()
+                dfm = dfm.head(50)
+                dfr = dfr.head(50)
+                dfr50 = dfr[dfr['市盈'] < 50]
                 print('*'*20)
-                print('市盈小于60的股票：')
-                print(df60)
+                print('净占比前50市盈小于60的股票：')
+                print(dfr50)
                 myStock = getMyStock()
-                for i in df60.head(50).index:
-                    code = df60.head(50)['代码'][i]
-                    flag = df60.head(50)['flag'][i]
-                    if (code+flag) not in myStock and isHighThanPre(code, flag):
-                        print(df60.head(50)['名称'][i], ' 不在自选中，加入自选')
+                for i in dfr50.index:
+                    code = dfr50['代码'][i]
+                    flag = dfr50['flag'][i]
+                    if (code+flag) not in myStock:
+                        print(dfr50['名称'][i], ' 不在自选中，加入自选')
                         add2MyStock(code+'|0'+ flag +'|01')
+                
+                dfm50 = dfm[dfm['市盈'] < 50]
+                print('*'*20)
+                print('净额前50市盈小于60的股票：')
+                print(dfm50)
+                myStock = getMyStock()
+                for i in dfm50.index:
+                    code = dfm50['代码'][i]
+                    flag = dfm50['flag'][i]
+                    if (code+flag) not in myStock:
+                        print(dfm50['名称'][i], ' 不在自选中，加入自选')
+                        add2MyStock(code+'|0'+ flag +'|01')
+                        
                 myStock = getMyStock()
                 ddf , ddf0, ddf1, ddf2 = getMultiStockInfo(','.join(myStock))
                 print()
