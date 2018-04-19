@@ -354,7 +354,7 @@ if __name__ == '__main__':
         dfr = dfr.head(50)
         dfr50 = dfr[dfr['市盈'] < 50]
         print('*'*20)
-        print('净占比前50市盈小于60的股票：')
+        print('净占比前50市盈小于50的股票：')
         print(dfr50)
         myStock = getMyStock()
         for i in dfr50.index:
@@ -366,7 +366,7 @@ if __name__ == '__main__':
                 
         dfm50 = dfm[dfm['市盈'] < 50]
         print('*'*20)
-        print('净额前50市盈小于60的股票：')
+        print('净额前50市盈小于50的股票：')
         print(dfm50)
         myStock = getMyStock()
         for i in dfm50.index:
