@@ -1,1 +1,1 @@
-运行eastmoney_windows.py
+运行eastmoney.py
